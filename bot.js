@@ -39,7 +39,7 @@ function process(update) {
           type: 'article',
           title: `💰 ${response.Identifier} - last: ${response.Last}`,
           input_message_content: {
-            message_text: `${response.Name} (${response.Identifier}) \nprice: ${response.Last} \n@time: ${response.DateTime} \n% change: ${response.PercentChange} \ndelay possible? ${response.Message}`
+            message_text: `${response.Name} (${response.Identifier}) \nprice: ${response.Last} \n@time: ${response.DateTime} \n% change: ${response.PercentChange}`
           }
         }
         answerInlineQuery(update.inline_query.id, [option]);
