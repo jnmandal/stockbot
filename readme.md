@@ -1,5 +1,5 @@
 # xignite telegram bot
-use the xignite stock API to send stock quotes over telegram
+use xignite superquotes API to send stock quotes over telegram
 
 ## setup
 * add a config.js that looks like:
