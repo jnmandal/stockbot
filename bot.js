@@ -37,7 +37,7 @@ function process(update) {
         let option = {
           id: update.inline_query.query,
           type: 'article',
-          title: `💰 ${response.Identifier} - last: ${response.Last}`,
+          title: `💰 ${response.Identifier.toUpperCase()} - last: ${response.Last}`,
           input_message_content: {
             message_text: `${response.Name} (${response.Identifier}) \nprice: ${response.Last} \n@time: ${response.DateTime} \n% change: ${response.PercentChange} \ndelay possible? ${response.Message}`
           }
