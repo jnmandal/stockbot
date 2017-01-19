@@ -1,6 +1,5 @@
 'use strict'
 const fetch  = require('node-fetch');
-const config = require('../config');
 
 /*
  * InlineQueryAnswer
@@ -20,14 +19,14 @@ class InlineQueryAnswer {
   }
 }
 
-/* 
+/*
  * @function answerInlineQuery
  * implements telegram's answerInlineQuery function
  * @param inlineQueryId the query_id we are responding to
  * @param results the possible results available
  */
 function answerInlineQuery(inlineQueryId, results) {
-  const endpoint = `https://api.telegram.org/bot${config.telegramToken}/answerInlineQuery`;
+  const endpoint = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/answerInlineQuery`;
   let answer = new InlineQueryAnswer(inlineQueryId, results);
   return fetch(endpoint, {
     method: 'post',

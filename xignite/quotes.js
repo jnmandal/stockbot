@@ -1,5 +1,4 @@
 const fetch = require('node-fetch');
-const xigniteEmail = require('../config').xigniteEmail;
 
 /*
  * @function getQuote
@@ -7,7 +6,7 @@ const xigniteEmail = require('../config').xigniteEmail;
  * @param quote - the ticker
  */
 function getQuote(quote) {
-  const endpoint = `http://superquotes.xignite.com/xSuperQuotes.json/GetQuote?IdentifierType=Symbol&Identifier=${quote}&header_username=${xigniteEmail}`
+  const endpoint = `http://superquotes.xignite.com/xSuperQuotes.json/GetQuote?IdentifierType=Symbol&Identifier=${quote}&header_username=${process.env.XIGNITE_EMAIL}`
   return fetch(endpoint)
     .then(response => response.json())
 }

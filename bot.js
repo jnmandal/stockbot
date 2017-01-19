@@ -1,4 +1,5 @@
 'use strict'
+require('dotenv').config();
 const TelegramUpdateQueue = require('./telegram/queue');
 
 /*
@@ -16,7 +17,7 @@ updates.onEnqueue = (update) => {
 updates.listen(800);
 console.log('Beginning data persistence');
 
-// main loop 
+// main loop
 setInterval(() => {
   if (updates.updates.length > 0) {
     let update = updates.dequeue();
