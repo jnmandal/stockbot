@@ -75,42 +75,71 @@ const inlineCompositeChart = (composite) =>
 
 function processUpdate(update) {
   if (update.inline_query) {
-    Logger.info(`query[telegram.inline],id[${update.inline_query.from.id}],handle[${update.inline_query.from.username}],query[${update.inline_query.query}]`);
-    const query = update.inline_query.query
-    let data = { ticker: query }
-    Promise.all([
-      getQuote(data.ticker)
-        .then(response => {
-          if (response.Outcome === 'Success') {
-            // grab the pertinent data
-            data.name      = response['Name'];
-            data.price     = response['Last'];
-            data.dayChange = response['PercentChange'];
-          }
-        })
-        .catch((err) => {
-          Logger.error('error in xignite superquote', err);
-        }),
-      getFundamentals(data.ticker)
-        .then(fundamentals => {
-          data.beta           = fundamentals['Beta']
-          data.pe             = fundamentals['PERatio']
-          data.marketCap      = fundamentals['MarketCapitalization']
-          data.fourWeekHigh   = fundamentals['HighPriceLast4Weeks']
-          data.fourWeekLow    = fundamentals['LowPriceLast4Weeks']
-          data.weekChange     = fundamentals['PercentPriceChange1Week']
-          data.fourWeekChange = fundamentals['PercentPriceChange4Weeks']
-          data.yearChange     = fundamentals['PercentPriceChange52Weeks']
-        })
-        .catch((err) => {
-          Logger.error('error in xignite factset fundamentals', err);
-        })
-    ]).then(() => {
-      // provide a summary and chart option or fallback to three composite charts
-      const choices = (query && data.price) ?
-        [inlineSummary(data), inlineChart(data)] :
-        [inlineCompositeChart('nasdaq'), inlineCompositeChart('dow'), inlineCompositeChart('sp500')]
-      answerInlineQuery(update.inline_query.id, choices);
-    });
+    handleInline(update.inline_query);
+  } else if (update.message.entities) {
+    handleStandard(update.message.text, update.message.entities)
+  } else {
+    Logger.warn(`Unhandled update ${JSON.stringify(update)}`)
   }
+}
+
+function handleStandard(text, entities) {
+  const commands = entities
+    .filter(ent => ent.type == 'bot_command')
+    .map(ent => text.slice(ent.offset, ent.offset + ent.length))
+  Logger.info(`command[telegram.standard],text[${text}],commands[${commands.join('|')}]`);
+  commands.forEach(handleCommand);
+}
+
+function handleCommand(command) {
+  switch (command) {
+    case '/start':
+      Logger.warn('Implement a response to start command');
+      break;
+    case '/help':
+      Logger.warn('Implement a response to help command');
+      break;
+    default:
+      Logger.warn(`Implement a response to unknown command: ${command}`);
+  }
+}
+
+function handleInline(inlineQuery) {
+  Logger.info(`query[telegram.inline],id[${inlineQuery.from.id}],handle[${inlineQuery.from.username}],query[${inlineQuery.query}]`);
+  const query = inlineQuery.query
+  let data = { ticker: query }
+  Promise.all([
+    getQuote(data.ticker)
+      .then(response => {
+        if (response.Outcome === 'Success') {
+          // grab the pertinent data
+          data.name      = response['Name'];
+          data.price     = response['Last'];
+          data.dayChange = response['PercentChange'];
+        }
+      })
+      .catch((err) => {
+        Logger.error('error in xignite superquote', err);
+      }),
+    getFundamentals(data.ticker)
+      .then(fundamentals => {
+        data.beta           = fundamentals['Beta']
+        data.pe             = fundamentals['PERatio']
+        data.marketCap      = fundamentals['MarketCapitalization']
+        data.fourWeekHigh   = fundamentals['HighPriceLast4Weeks']
+        data.fourWeekLow    = fundamentals['LowPriceLast4Weeks']
+        data.weekChange     = fundamentals['PercentPriceChange1Week']
+        data.fourWeekChange = fundamentals['PercentPriceChange4Weeks']
+        data.yearChange     = fundamentals['PercentPriceChange52Weeks']
+      })
+      .catch((err) => {
+        Logger.error('error in xignite factset fundamentals', err);
+      })
+  ]).then(() => {
+    // provide a summary and chart option or fallback to three composite charts
+    const choices = (query && data.price) ?
+      [inlineSummary(data), inlineChart(data)] :
+      [inlineCompositeChart('nasdaq'), inlineCompositeChart('dow'), inlineCompositeChart('sp500')]
+    answerInlineQuery(inlineQuery.id, choices);
+  });
 }

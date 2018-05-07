@@ -1,11 +1,5 @@
 const fetch = require('node-fetch');
 
-/*
- * @function getFundamentals
- * GETs comppany fundamentals from xignite
- * @param quote - the ticker
- */
-
 const fundamentalTypes = [
   'MarketCapitalization',
   'PERatio',
@@ -22,6 +16,11 @@ const asOfDate = () => {
   return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
 }
 
+/*
+ * @function getFundamentals
+ * GETs comppany fundamentals from xignite
+ * @param quote - the ticker
+ */
 function getFundamentals(ticker) {
   const endpoint = `https://factsetfundamentals.xignite.com/xFactSetFundamentals.json/GetFundamentals` +
     `?IdentifierType=Symbol&Identifiers=${ticker}&FundamentalTypes=${fundamentalTypes.join(',')}` +
