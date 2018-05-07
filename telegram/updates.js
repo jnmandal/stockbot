@@ -7,7 +7,10 @@ const fetch  = require('node-fetch');
  * @param offset the offset to send for polling
  */
 function getUpdates(offset) {
-  const endpoint = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/getUpdates${offset ? ('?offset='+offset) : ''}`;
+  const endpoint = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/getUpdates?timeout=10&${offset ? ('offset='+offset+'&') : ''}`;
+  if (process.env.DEBUG) {
+    console.log(`[${new Date()}] - Fetching updates w/ offset: ${offset}`);
+  }
   return fetch(endpoint)
     .then(result => result.json());
 }

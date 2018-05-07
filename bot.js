@@ -7,26 +7,27 @@ const TelegramUpdateQueue = require('./telegram/queue');
  * updates are generated on an interval
  * then stored in a queue
  */
-let updates = new TelegramUpdateQueue();
-updates.onEnqueue = (update) => {
-  let updateAmount = updates.updates.length;
+let queue = new TelegramUpdateQueue();
+queue.onEnqueue = (update) => {
+  let updateAmount = queue.updates.length;
   console.log(`[${new Date()}] - Enqueued update_id: ${update.update_id}`);
   console.log(`[${new Date()}] - Updates In queue: ${updateAmount}`);
 }
-// check for updates every 400ms
-updates.listen(400);
-console.log('Beginning data persistence');
+
+queue.listen();
+console.log(`[${new Date()}] - Telegram data layer boot success`);
 
 // main loop
 setInterval(() => {
-  if (updates.updates.length > 0) {
-    let update = updates.dequeue();
-    let updateAmount = updates.updates.length;
+  if (queue.updates.length > 0) {
+    let update = queue.dequeue();
+    let updateAmount = queue.updates.length;
     console.log(`[${new Date()}] - Dequeued update_id: ${update.update_id}`);
     console.log(`[${new Date()}] - Updates In queue: ${updateAmount}`);
     process(update);
   }
 }, 1);
+console.log(`[${new Date()}] - Message queue listener boot success`);
 
 const answerInlineQuery = require('./telegram/inline').answerInlineQuery;
 const getQuote = require('./xignite/quotes').getQuote;

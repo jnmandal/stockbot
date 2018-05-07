@@ -2,14 +2,12 @@
 use xignite superquotes API to send stock quotes over telegram
 
 ## setup
-* add a config.js that looks like:
+* add a .env that looks like:
 ```
-module.exports = {
-  telegramToken: '<TOKEN>',
-  xigniteEmail: '<EMAIL>'
-}
+TELEGRAM_TOKEN="<token>"
+XIGNITE_EMAIL="<email>"
 ```
-* be using the correct node version (5.10.1)
+* be using the correct node version (check .nvmrc)
 * run `node bot.js`
 * ???
-* profit 
+* profit

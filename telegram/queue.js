@@ -4,7 +4,7 @@ const getUpdates = require('./updates').getUpdates;
 /*
  * TelegramUpdateQueue
  * a queue data structure to keep track of updates from polling
- * coupled to getUpdates as described at: 
+ * coupled to getUpdates as described at:
  * https://core.telegram.org/bots/api#getting-updates
  */
 class TelegramUpdateQueue {
@@ -38,11 +38,17 @@ class TelegramUpdateQueue {
     return update;
   }
   getAndStoreUpdates() {
-    getUpdates(this.offset)
+    return getUpdates(this.offset)
       .then(response => {response.result.forEach(this.enqueue)})
+      .catch(err => {
+        console.log(`[${new Date()}] - ERROR: unable to enqueue updates`)
+        console.log(err)
+      })
   }
-  listen(interval) {
-    setInterval(this.getAndStoreUpdates, interval || 1000);
+  listen() {
+    this
+      .getAndStoreUpdates()
+      .then(this.listen);
   }
 }
 
