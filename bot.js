@@ -37,10 +37,50 @@ const answerInlineQuery = require('./telegram/inline').answerInlineQuery;
 const getQuote = require('./xignite/quotes').getQuote;
 const getFundamentals = require('./xignite/fundamentals').getFundamentals;
 
-function process(update) {
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+const inlineSummary = (data) =>
+  ({
+    id: uuidv4(),
+    type: 'article',
+    title: `💰 ${data.ticker.toUpperCase()} - ${data.price} (${data.dayChange}%)`,
+    description: `Summary data for ${data.ticker.toUpperCase()}`,
+    input_message_content: {
+      message_text: `${data.name} (${data.ticker.toUpperCase()}) \nprice: ${data.price}\n% today change: ${data.dayChange}%\n% 7 day change: ${data.weekChange}%\n% 52 week change: ${data.yearChange}\nfour week high/low: ${data.fourWeekHigh}/${data.fourWeekLow}\nbeta: ${data.beta}\nPE ratio: ${data.pe}`
+    }
+  })
+
+const inlineChart = (data) =>
+  ({
+    id: `${uuidv4()}-photo`,
+    type: 'photo',
+    title: `📈 ${data.ticker.toUpperCase()} - Chart (52 weeks)`,
+    description: `52 week line chart for ${data.ticker.toUpperCase()}`,
+    thumb_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&s=m`,
+    photo_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&ta=1`
+  })
+
+const inlineCompositeChart = (composite) =>
+  ({
+    id: `${uuidv4()}-photo`,
+    type: 'photo',
+    title: `📈 ${composite.toUpperCase()} - Chart (intraday)`,
+    description: `Intraday candlestick chart for ${composite.toUpperCase()}`,
+    thumb_url: `https://finviz.com/image.ashx?${composite}?s=m`,
+    photo_url: `https://finviz.com/image.ashx?${composite}`
+  })
+
+
+function processUpdate(update) {
   if (update.inline_query) {
     console.log(`[${new Date()}] - query[telegram.inline],id[${update.inline_query.from.id}],handle[${update.inline_query.from.username}],query[${update.inline_query.query}]`);
-    let data = { ticker: update.inline_query.query }
+    const query = update.inline_query.query
+    let data = { ticker: query }
     Promise.all([
       getQuote(data.ticker)
         .then(response => {
@@ -71,22 +111,11 @@ function process(update) {
           console.log(err);
         })
     ]).then(() => {
-      const summaryOption = {
-        id: `${update.inline_query.query}-${update.update_id}`,
-        type: 'article',
-        title: `💰 ${data.ticker.toUpperCase()} - ${data.price} (${data.dayChange}%)`,
-        input_message_content: {
-          message_text: `${data.name} (${data.ticker.toUpperCase()}) \nprice: ${data.price}\n% today change: ${data.dayChange}%\n% 7 day change: ${data.weekChange}%\n% 52 week change: ${data.yearChange}\nfour week high/low: ${data.fourWeekHigh}/${data.fourWeekLow}\nbeta: ${data.beta}\nPE ratio: ${data.pe}`
-        }
-      }
-      const chartOption = {
-        id: `${update.inline_query.query}-${update.update_id}-photo`,
-        type: 'photo',
-        title: `📈 ${data.ticker.toUpperCase()} - Chart (52 weeks)`,
-        thumb_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&s=m`,
-        photo_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&ta=1`
-      }
-      answerInlineQuery(update.inline_query.id, data.price ? [summaryOption, chartOption] : []);
+      // provide a summary and chart option or fallback to three composite charts
+      const choices = (query && data.price) ?
+        [inlineSummary(data), inlineChart(data)] :
+        [inlineCompositeChart('nasdaq'), inlineCompositeChart('dow'), inlineCompositeChart('sp500')]
+      answerInlineQuery(update.inline_query.id, choices);
     });
   }
 }
