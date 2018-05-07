@@ -1,6 +1,7 @@
 'use strict'
 require('dotenv').config();
 const TelegramUpdateQueue = require('./telegram/queue');
+const Logger = require('./logger');
 
 /*
  * Data persistence
@@ -10,28 +11,24 @@ const TelegramUpdateQueue = require('./telegram/queue');
 let queue = new TelegramUpdateQueue();
 queue.onEnqueue = (update) => {
   let updateAmount = queue.updates.length;
-  if (process.env.DEBUG) {
-    console.log(`[${new Date()}] - Enqueued update_id: ${update.update_id}`);
-    console.log(`[${new Date()}] - Updates In queue: ${updateAmount}`);
-  }
+  Logger.debug(`Enqueued update_id: ${update.update_id}`);
+  Logger.debug(`Updates In queue: ${updateAmount}`);
 }
 
 queue.listen();
-console.log(`[${new Date()}] - Telegram data layer boot success`);
+Logger.info(`Telegram data layer boot success`);
 
 // main loop
 setInterval(() => {
   if (queue.updates.length > 0) {
     let update = queue.dequeue();
     let updateAmount = queue.updates.length;
-    if (process.env.DEBUG) {
-      console.log(`[${new Date()}] - Dequeued update_id: ${update.update_id}`);
-      console.log(`[${new Date()}] - Updates In queue: ${updateAmount}`);
-    }
+    Logger.debug(`Dequeued update_id: ${update.update_id}`);
+    Logger.debug(`Updates In queue: ${updateAmount}`);
     processUpdate(update);
   }
 }, 1);
-console.log(`[${new Date()}] - Message queue listener boot success`);
+Logger.info(`Message queue listener boot success`);
 
 const answerInlineQuery = require('./telegram/inline').answerInlineQuery;
 const getQuote = require('./xignite/quotes').getQuote;
@@ -78,7 +75,7 @@ const inlineCompositeChart = (composite) =>
 
 function processUpdate(update) {
   if (update.inline_query) {
-    console.log(`[${new Date()}] - query[telegram.inline],id[${update.inline_query.from.id}],handle[${update.inline_query.from.username}],query[${update.inline_query.query}]`);
+    Logger.info(`query[telegram.inline],id[${update.inline_query.from.id}],handle[${update.inline_query.from.username}],query[${update.inline_query.query}]`);
     const query = update.inline_query.query
     let data = { ticker: query }
     Promise.all([
@@ -92,8 +89,7 @@ function processUpdate(update) {
           }
         })
         .catch((err) => {
-          console.log('error in xignite superquote');
-          console.log(err);
+          Logger.error('error in xignite superquote', err);
         }),
       getFundamentals(data.ticker)
         .then(fundamentals => {
@@ -107,8 +103,7 @@ function processUpdate(update) {
           data.yearChange     = fundamentals['PercentPriceChange52Weeks']
         })
         .catch((err) => {
-          console.log('error in xignite factset fundamentals');
-          console.log(err);
+          Logger.error('error in xignite factset fundamentals', err);
         })
     ]).then(() => {
       // provide a summary and chart option or fallback to three composite charts

@@ -41,8 +41,7 @@ class TelegramUpdateQueue {
     return getUpdates(this.offset)
       .then(response => {response.result.forEach(this.enqueue)})
       .catch(err => {
-        console.log(`[${new Date()}] - ERROR: unable to enqueue updates`)
-        console.log(err)
+        Logger.error(`unable to enqueue updates`, err);
       })
   }
   listen() {
