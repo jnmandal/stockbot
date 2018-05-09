@@ -137,6 +137,7 @@ function handleInline(inlineQuery) {
       })
   ]).then(() => {
     // provide a summary and chart option or fallback to three composite charts
+    Logger.debug(`Found stock data of ${JSON.stringify(data)}`)
     const choices = (query && data.price) ?
       [inlineSummary(data), inlineChart(data)] :
       [inlineCompositeChart('nasdaq'), inlineCompositeChart('dow'), inlineCompositeChart('sp500')]
