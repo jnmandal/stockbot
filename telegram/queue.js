@@ -1,5 +1,6 @@
 'use strict'
 const getUpdates = require('./updates').getUpdates;
+const Logger = require('../logger');
 
 /*
  * TelegramUpdateQueue
