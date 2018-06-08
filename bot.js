@@ -41,6 +41,11 @@ function uuidv4() {
   });
 }
 
+function epochTimeStamp() {
+  const d = new Date();
+  return d.getTime();
+}
+
 const inlineSummary = (data) =>
   ({
     id: uuidv4(),
@@ -58,8 +63,8 @@ const inlineChart = (data) =>
     type: 'photo',
     title: `📈 ${data.ticker.toUpperCase()} - Chart (52 weeks)`,
     description: `52 week line chart for ${data.ticker.toUpperCase()}`,
-    thumb_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&s=m`,
-    photo_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&ta=1`
+    thumb_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&s=m&ts=${epochTimeStamp()}`,
+    photo_url: `https://finviz.com/chart.ashx?t=${data.ticker.toUpperCase()}&ty=l&ta=1&ts=${epochTimeStamp()}`
   })
 
 const inlineCompositeChart = (composite) =>
@@ -68,8 +73,8 @@ const inlineCompositeChart = (composite) =>
     type: 'photo',
     title: `📈 ${composite.toUpperCase()} - Chart (intraday)`,
     description: `Intraday candlestick chart for ${composite.toUpperCase()}`,
-    thumb_url: `https://finviz.com/image.ashx?${composite}?s=m`,
-    photo_url: `https://finviz.com/image.ashx?${composite}`
+    thumb_url: `https://finviz.com/image.ashx?${composite}&s=m&ts=${epochTimeStamp()}`,
+    photo_url: `https://finviz.com/image.ashx?${composite}&ts=${epochTimeStamp()}`
   })
 
 
